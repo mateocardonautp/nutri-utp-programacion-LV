@@ -1,4 +1,4 @@
-#!/home/mocdev_/Documents/nutriUTP-0.0.1-moc-v/.venv/bin/python3
+#!/home/mocdev_/Documents/nutriUTP-0.0.1-moc-v/.venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

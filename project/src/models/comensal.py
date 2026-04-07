@@ -4,15 +4,16 @@ class Comensal:
     """
     def __init__(self, **kwargs):
         """
-        Inicializa un Comensal con valores por defecto si no se proporcionan.
+        Inicializa un Comensal con valores por defecto utilizando nombres descriptivos.
         """
-        default_comensal_estudiante = {
+        configuracion_por_defecto_del_comensal_estudiante = {
             "id_estudiante": "0000",
             "tipo_subsidio": "None",
         }
-        default_comensal_estudiante.update(kwargs)
-        self.id_estudiante  = default_comensal_estudiante["id_estudiante"]
-        self._tipo_subsidio = default_comensal_estudiante["tipo_subsidio"]
+        configuracion_por_defecto_del_comensal_estudiante.update(kwargs)
+        
+        self.id_estudiante = configuracion_por_defecto_del_comensal_estudiante["id_estudiante"]
+        self._tipo_subsidio = configuracion_por_defecto_del_comensal_estudiante["tipo_subsidio"]
 
     @property
     def tipo_subsidio(self):
@@ -20,66 +21,83 @@ class Comensal:
         return self._tipo_subsidio
 
     @tipo_subsidio.setter
-    def tipo_subsidio(self, valor: str):
+    def tipo_subsidio(self, valor_del_subsidio_parametro: str):
         """
-        Valida que el subsidio asignado pertenezca a las categorías oficiales.
+        Valida que el subsidio pertenezca a las categorías oficiales mediante aislamiento.
         """
-        subsidios_validos = {"Subsidio", "Subsidio parcial", "Subsidio semi parcial", "None"}
-        if valor not in subsidios_validos:
-            raise ValueError(f"Subsidio inválido: {valor}")
-        self._tipo_subsidio = valor
+        if not self._verificar_validez_del_subsidio_externo(valor_del_subsidio_parametro):
+            raise ValueError(f"Subsidio inválido detectado: {valor_del_subsidio_parametro}")
+        self._tipo_subsidio = valor_del_subsidio_parametro
+
+    def _verificar_validez_del_subsidio_externo(self, cadena_de_subsidio_a_validar):
+        """Aísla el conjunto de reglas de validación de subsidios."""
+        conjunto_de_subsidios_validos_oficiales = {
+            "Subsidio", 
+            "Subsidio parcial", 
+            "Subsidio semi parcial", 
+            "None"
+        }
+        return cadena_de_subsidio_a_validar in conjunto_de_subsidios_validos_oficiales
 
 
 class CalcularPrecioComensal:
     """
     Motor de cálculo para determinar el costo final de un plato según el perfil del comensal.
     """
-    def __init__(self, comensal: Comensal):
-    
-        self._comensal = comensal             
+    def __init__(self, objeto_comensal_instanciado: Comensal):
+        self._comensal_asignado_al_calculo = objeto_comensal_instanciado             
 
     @property
     def comensal(self):                       
-    
-        return self._comensal
+        return self._comensal_asignado_al_calculo
 
-    def calcular_descuento(self, valor_plato: float):
-        return self._operacion_matematica_subsidio(valor_plato)
+    def calcular_descuento(self, monto_valor_del_plato_base: float):
+        """Orquesta el cálculo del descuento delegando en la operación aislada."""
+        return self._ejecutar_operacion_matematica_de_subsidio_privada(monto_valor_del_plato_base)
 
-    def _operacion_matematica_subsidio(self, valor_base: float):
-        politica_descuentos = {
+    def _ejecutar_operacion_matematica_de_subsidio_privada(self, monto_base_para_calculo: float):
+        """Aísla la política de porcentajes de descuento del sistema."""
+        tabla_de_politica_de_descuentos_oficial = {
             "Subsidio"             : 1.0,
             "Subsidio parcial"     : 0.5,
             "Subsidio semi parcial": 0.25,
             "None"                 : 0.0,
         }
-        porcentaje_del_subsidio = politica_descuentos.get(self._comensal.tipo_subsidio, 0.0)
-        return valor_base * porcentaje_del_subsidio
+        
+        tipo_de_subsidio_del_estudiante = self._comensal_asignado_al_calculo.tipo_subsidio
+        porcentaje_de_descuento_aplicable = tabla_de_politica_de_descuentos_oficial.get(
+            tipo_de_subsidio_del_estudiante, 0.0
+        )
+        
+        return monto_base_para_calculo * porcentaje_de_descuento_aplicable
 
-    def obtener_precio_final(self, valor_plato: float):
-        descuento = self.calcular_descuento(valor_plato)
-        return valor_plato - descuento
+    def obtener_precio_final(self, monto_valor_del_plato_inicial: float):
+        """Calcula el monto final restando el descuento obtenido de forma aislada."""
+        monto_del_descuento_calculado = self.calcular_descuento(monto_valor_del_plato_inicial)
+        return monto_valor_del_plato_inicial - monto_del_descuento_calculado
 
 
 class MostrarComensal:
     """
     Encargada de la representación visual de los datos del comensal en consola.
     """
-    def __init__(self, comensal: Comensal):
-    
-        self._comensal = comensal             
+    def __init__(self, objeto_comensal_para_visualizar: Comensal):
+        self._comensal_visualizado = objeto_comensal_para_visualizar             
 
     def descripcion_detallada_comensal(self):
-        
-        self._encabezado_descripcion_detallada_comensal()
-        self._informacion_del_comensal()
+        """Coordina la impresión de la información detallada."""
+        self._imprimir_encabezado_de_descripcion_detallada_privado()
+        self._imprimir_lineas_de_informacion_del_comensal_privado()
 
     @staticmethod                            
-    def _encabezado_descripcion_detallada_comensal():
-
+    def _imprimir_encabezado_de_descripcion_detallada_privado():
         print("\n", "=" * 15, "Descripción Del Comensal", "=" * 15)
 
-    def _informacion_del_comensal(self):
-        print(f"- Id del comensal  : {self._comensal.id_estudiante}")
-        print(f"- Tipo de subsidio : {self._comensal.tipo_subsidio}")
+    def _imprimir_lineas_de_informacion_del_comensal_privado(self):
+        """Aísla el acceso a los atributos del objeto Comensal para la impresión."""
+        id_del_estudiante_extraida = self._comensal_visualizado.id_estudiante
+        tipo_de_subsidio_extraido = self._comensal_visualizado.tipo_subsidio
+        
+        print(f"- Id del comensal  : {id_del_estudiante_extraida}")
+        print(f"- Tipo de subsidio : {tipo_de_subsidio_extraido}")
         print("\n")

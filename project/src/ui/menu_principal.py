@@ -1,3 +1,6 @@
+
+
+
 from project.src.ui.menu_acerca import MostrarMenuAcerca
 from project.src.ui.menu_plato import MostrarMenuPlato
 from project.src.ui.menu_dia import SeleccionarMenuDelDia, MostrarMenu
@@ -10,38 +13,45 @@ from project.src.services.gestor_de_archivo_tesoreria import GestorReportesCSV
 from project.src.services.limpiar_pantalla import limpiar_terminal
 from project.src.tools.funcionalidad_menu_dia import FuncionalidadMenuDia, archivo_platos, archivo_menu
 
+class AppFactory:
+
+    
+    @staticmethod
+    def construir_modulo_caja():
+        ruta_ventas = "project/src/tesoreria/ventas.csv"
+        
+        motor_archivos = FuncionalidadMenuDia(archivo_platos, archivo_menu)
+        menu_hoy = motor_archivos.preparar_y_obtener()
+        
+        gestor_reportes = GestorReportesCSV(ruta_ventas)
+        estudiante = Comensal(id_estudiante="", tipo_subsidio="None")
+        calculadora = CalcularPrecioComensal(estudiante)
+        procesador = ProcesadorVenta(calculadora, gestor_reportes)
+        
+        return MostrarMenuCaja(InterfazCajaUTP(procesador), menu_hoy, gestor_reportes)
+
+    @staticmethod
+    def construir_menu_dia():
+        selector_funcion = FuncionalidadMenuDia(archivo_platos, archivo_menu)
+        menu_instanciado = selector_funcion.preparar_y_obtener()
+        return SeleccionarMenuDelDia(menu_instanciado)
+
 
 class MostrarMenuPrincipal:
-    """
-    Clase encargada de la representación visual del menú principal.
-    """
-    def __init__(self):
-        limpiar_terminal()
-
     def ejecutar_interfaz_menu_principal(self):
-        """
-        Inicia el bucle principal de la interfaz. Muestra las opciones y 
-        coordina con SeleccionarMenuPrincipal para procesar la entrada del usuario.
-        """
+        selector_opcion = SeleccionarMenuPrincipal()
+        
         while True:
-            self._encabezado_menu_principal()
-            self._opciones_menu_principal()
+            self._limpiar_pantalla_externa()
+            self._dibujar_interfaz()
+            
+            resultado = selector_opcion.gestionar_entrada_usuario()
 
-            selector_opcion = SeleccionarMenuPrincipal()
-            verificador = selector_opcion.verificar_opcion_menu_principal()
-
-            if verificador == "volver_anterior":
-                limpiar_terminal()
-                continue
-            elif verificador == "salir_del_programa":
+            if resultado == "salir_del_programa":
                 break
-
-    @staticmethod
-    def _encabezado_menu_principal():
+    
+    def _dibujar_interfaz(self):
         print("\n", "=" * 10, "NUTRI-UTP", "=" * 10)
-
-    @staticmethod
-    def _opciones_menu_principal():
         print("-1. MENU DEL DIA")
         print("-2. GESTOR DE PLATOS")
         print("-3. NUTRI-UTP CAJA")
@@ -50,77 +60,69 @@ class MostrarMenuPrincipal:
         print("=" * 33)
 
 
+    def _limpiar_pantalla_externa(self):
+        limpiar_terminal()
+
+
 class SeleccionarMenuPrincipal:
-    """
-    Clase encargada de la lógica de negocio y redirección de opciones.
-    """
+    
+    def gestionar_entrada_usuario(self):
+        try:
+            opcion = int(input("\nEscriba la opcion que desee (1/5) : "))
+        except ValueError:
+            print("Error: Ingrese un valor numerico (1/5).")
+            input("Presione Enter para continuar...")
+            return "volver_anterior"
 
-    def verificar_opcion_menu_principal(self):
-        """
-        Gestiona la captura de la opción ingresada por teclado.
-        """
-        while True:
-            try:
-                opcion = int(input("\nEscriba la opcion que desee (1/5) : "))
-            except ValueError:
-                print("Error: Ingrese un valor numerico (1/5).")
-                continue                      
+        return self._redireccionar(opcion)
 
-            if opcion == 1:
-                return self._ejecutar_menu_dia()
-            elif opcion == 2:
-                return self._ejecutar_menu_plato()
-            elif opcion == 3:
-                return self._ejecutar_menu_caja()
-            elif opcion == 4:
-                return self._ejecutar_menu_acerca()
-            elif opcion == 5:
-                if saliendo_del_programa() == "salir_del_programa":
-                    return "salir_del_programa"
-                return "volver_anterior"
-            else:
-                print("Opción no valida. Intente de nuevo.")
+    def _redireccionar(self, opcion):
+        opciones = {
+            1: self._flujo_menu_dia,
+            2: self._flujo_menu_plato,
+            3: self._flujo_menu_caja,
+            4: self._flujo_menu_acerca,
+        }
 
-    def _ejecutar_menu_dia(self):
-        """Prepara y lanza el flujo de selección del menú del día."""
-        selector = FuncionalidadMenuDia(archivo_platos, archivo_menu)
-        menu_instanciado = selector.preparar_y_obtener()
-        interfaz_selector = SeleccionarMenuDelDia(menu_instanciado)
+        if opcion in opciones:
+            return opciones[opcion]()
+        elif opcion == 5:
+            return self._ejecutar_salida_externa() 
+        
+        print("Opción no válida.")
+        input("Presione Enter para continuar...")
+        return "volver_anterior"
+
+
+    def _flujo_menu_dia(self):
+    
+        interfaz_selector = AppFactory.construir_menu_dia()
         platos_filtrados = interfaz_selector.ejecutar_interfaz_seleccion()
+        
         MostrarMenu.mostrar_menu_del_dia(platos_filtrados)
+        
         input("\nPresione Enter para volver...")
         return "volver_anterior"
 
-    def _ejecutar_menu_plato(self):
-        """Instancia y lanza la interfaz de gestión de platos."""
-        selector = MostrarMenuPlato()
-        selector.ejecutar_interfaz_plato()
+    def _flujo_menu_plato(self):
+    
+        menu_plato = MostrarMenuPlato()
+        menu_plato.ejecutar_interfaz_plato()
         return "volver_anterior"
 
-    def _ejecutar_menu_caja(self):
-        """Instancia y lanza la interfaz de caja."""
-        caja = self._construir_caja()
+    def _flujo_menu_caja(self):
+
+        caja = AppFactory.construir_modulo_caja()
         caja.ejecutar_interfaz_caja()
         return "volver_anterior"
 
-    def _ejecutar_menu_acerca(self):
-        """Muestra la información de la aplicación."""
-        selector = MostrarMenuAcerca()
-        selector.ejecutar_interfaz_acerca_menu()
+    def _flujo_menu_acerca(self):
+
+        menu_acerca = MostrarMenuAcerca()
+        menu_acerca.ejecutar_interfaz_acerca_menu()
+
         return "volver_anterior"
 
-    def _construir_caja(self):
-        """
-        Ensambla todos los componentes necesarios para el módulo de caja.
-        
-        Realiza la inyección de dependencias necesaria (comensal, calculadora, 
-        procesador y gestor de reportes).
-        """
-        ruta_ventas = "src/src/tesoreria/ventas.csv"
-        motor_archivos = FuncionalidadMenuDia(archivo_platos, archivo_menu)
-        menu_hoy = motor_archivos.preparar_y_obtener()
-        gestor_reportes = GestorReportesCSV(ruta_ventas)
-        estudiante = Comensal(id_estudiante="", tipo_subsidio="None")
-        calculadora = CalcularPrecioComensal(estudiante)
-        procesador = ProcesadorVenta(calculadora, gestor_reportes)
-        return MostrarMenuCaja(InterfazCajaUTP(procesador), menu_hoy, gestor_reportes)
+    def _ejecutar_salida_externa(self):
+    
+        return saliendo_del_programa()

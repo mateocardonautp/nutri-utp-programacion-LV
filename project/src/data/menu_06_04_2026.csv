@@ -1,0 +1,5 @@
+nombre,_precio_base,es_vegetariano,_ingredientes
+Chorizo santarosano,8000.0,False,Chorizo - Arepa
+Pollo con papas,10400.0,False,Pollo - Arroz - Papa
+Sancocho,10.4,False,Pollo - Yuca - Platano - Papa
+Taco de frijoles,8500.0,True,Taco - Frijol

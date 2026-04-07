@@ -1,7 +1,5 @@
 class Plato:
-    """
-    Representa la entidad base de un plato en el sistema.
-    """
+
 
     def __init__(self, **kwargs):
 
@@ -33,18 +31,6 @@ class Plato:
 
         return list(self._ingredientes)
 
-    @nombre.setter
-    def nombre(self, nuevo_nombre: str):
-
-        if not nuevo_nombre or not isinstance(nuevo_nombre, str):
-            raise ValueError("El nombre debe ser un string no vacío")
-        self._nombre = nuevo_nombre.strip()
-
-    @es_vegetariano.setter
-    def es_vegetariano(self, valor: bool):
-        if not isinstance(valor, bool):
-            raise ValueError("es_vegetariano debe ser booleano")
-        self._es_vegetariano = valor
 
 
     def agregar_ingrediente(self, ingrediente: str):
@@ -52,11 +38,6 @@ class Plato:
             raise ValueError("El ingrediente debe ser un string no vacío")
         self._ingredientes.append(ingrediente.strip())
 
-    def quitar_ingrediente(self, ingrediente: str):
-        if ingrediente in self._ingredientes:
-            self._ingredientes.remove(ingrediente)
-            return True
-        return False
 
     def to_dict(self):
         cadena_ingredientes = ""
@@ -69,15 +50,15 @@ class Plato:
             "nombre": self._nombre,
             "_precio_base": self._precio_base,
             "es_vegetariano": self._es_vegetariano,
-            "_ingredients": cadena_ingredientes
+            "_ingredientes": cadena_ingredientes
         }
 
     @staticmethod
     def default_plato():
 
         return {
-            "nombre": "Almuerzo Genérico",
-            "precio_base": 10,
+            "nombre": "Almuerzo Corrientazo",
+            "precio_base": 10.400,
             "es_vegetariano": True,
         }
 
