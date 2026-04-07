@@ -1,0 +1,5 @@
+nombre,_precio_base,es_vegetariano,_ingredientes
+Pollo con papas,10400.0,False,Pollo - Arroz - Papa
+Sancocho,10400.0,False,Pollo - Yuca - Platano - Papa
+Chorizo santarosano,8000.0,False,Chorizo - Arepa
+Empanada de papa,2500.0,True,Masa - Papa

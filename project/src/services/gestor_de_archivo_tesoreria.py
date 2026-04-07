@@ -23,11 +23,17 @@ class GestorReportesCSV:
         self._escribir_linea_en_archivo_csv_externo(datos_de_la_venta_para_guardar)
 
     def leer_todas_las_ventas(self):
-       
         if not self._verificar_existencia_del_archivo_fisico_externo():
             return []
-            
-        return self._leer_datos_estructurados_del_csv_externo()
+        todas = self._leer_datos_estructurados_del_csv_externo()
+        return self._filtrar_ventas_por_fecha_de_hoy_externo(todas)
+
+    def _filtrar_ventas_por_fecha_de_hoy_externo(self, lista_de_ventas_parametro):
+        fecha_de_hoy_actual = datetime.now().strftime("%Y-%m-%d")
+        return [
+            venta for venta in lista_de_ventas_parametro
+            if venta['Fecha'].startswith(fecha_de_hoy_actual)
+        ]
 
   
 

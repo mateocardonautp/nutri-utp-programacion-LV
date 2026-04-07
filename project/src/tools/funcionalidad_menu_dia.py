@@ -72,13 +72,13 @@ class FuncionalidadMenuDia:
         self._motor_menu  = motor_menu_parametro
 
     def preparar_y_obtener(self):
-
         servicio_carga = self._instanciar_servicio_carga_externo(self._motor_plato)
-        
         generador_instancia = GeneradorMenuDia(servicio_carga, self._motor_menu)
         generador_instancia.generar_si_no_existe()
         
-        platos_de_hoy_extraidos = servicio_carga.obtener_todos_los_platos()
+    
+        servicio_menu_dia = self._instanciar_servicio_carga_externo(self._motor_menu)
+        platos_de_hoy_extraidos = servicio_menu_dia.obtener_todos_los_platos()
         
         return self._crear_objeto_menu_dia_externo(platos_de_hoy_extraidos)
 

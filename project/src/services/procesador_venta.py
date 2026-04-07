@@ -1,21 +1,16 @@
 import sys
 import os
 
-# --- AISLAMIENTO DE CONFIGURACIÓN DE SISTEMA ---
 def _configurar_entorno_de_rutas_del_sistema_externo():
-    """
-    Encapsula la manipulación del path para evitar dependencias directas.
-    Utiliza nombres largos y descriptivos en español.
-    """
+
     ruta_raiz_del_proyecto_actual = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
     
     if ruta_raiz_del_proyecto_actual not in sys.path:
         sys.path.append(ruta_raiz_del_proyecto_actual)
 
-# LLAMADA AL MÉTODO: El nombre coincide exactamente con la definición
+
 _configurar_entorno_de_rutas_del_sistema_externo()
 
-# Importaciones externas
 from src.models.plato import Plato
 from src.ui.menu_dia import FechaMenu
 from src.models.comensal import CalcularPrecioComensal
